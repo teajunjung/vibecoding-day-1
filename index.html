@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디어 저장소 - 수국 정원</title>
+    <meta name="description" content="아이디어가 모이고 피어나는 곳. 수국꽃 정원.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #051c14;
+            --text-color: #ffffff;
+            --accent-primary: #00b894;
+            --accent-secondary: #55efc4;
+            --glow-color: rgba(85, 239, 196, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Glow */
+        .ambient-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--glow-color) 0%, rgba(10, 11, 16, 0) 70%);
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(80px);
+            transition: left 0.1s ease-out, top 0.1s ease-out;
+        }
+
+        /* Decorative Grid Background */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center center;
+            z-index: 0;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 3rem;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: containerAppear 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Animated Title */
+        .idea-title {
+            font-size: 5.5rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #55efc4 50%, #00b894 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 8s ease infinite;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .idea-title:hover {
+            transform: scale(1.03);
+        }
+
+        /* Subtle Tagline */
+        .tagline {
+            margin-top: 1.2rem;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        @property --glow-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        /* Hydrangea Box Wrapper for Glowing Light Effects */
+        .hydrangea-box-wrapper {
+            position: relative;
+            width: 500px;
+            height: 300px;
+            margin-top: 2rem;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .hydrangea-box-wrapper:hover {
+            transform: scale(1.02) translateY(-2px);
+        }
+
+        /* Continuous Rotating Border Glow */
+        .hydrangea-box-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 22px;
+            background: conic-gradient(
+                from var(--glow-angle),
+                transparent 10%,
+                #55efc4 30%,
+                #81ecec 50%,
+                #a29bfe 70%,
+                #fd79a8 90%,
+                transparent 100%
+            );
+            z-index: 1;
+            animation: spin 6s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Ambient Background Reflection Glow */
+        .hydrangea-box-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border-radius: 32px;
+            background: conic-gradient(
+                from var(--glow-angle),
+                transparent 10%,
+                rgba(85, 239, 196, 0.4) 30%,
+                rgba(129, 236, 236, 0.5) 50%,
+                rgba(162, 155, 254, 0.4) 70%,
+                rgba(253, 121, 168, 0.3) 90%,
+                transparent 100%
+            );
+            filter: blur(20px);
+            opacity: 0.8;
+            z-index: -1;
+            pointer-events: none;
+            animation: spin 6s linear infinite;
+        }
+
+        /* Hydrangea Box styling */
+        .hydrangea-box {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: rgba(5, 28, 20, 0.75); /* Darker translucent background to pop the flowers and blend the glow */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15),
+                        0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        /* Glossy sweep reflection highlight */
+        .hydrangea-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.02) 20%,
+                rgba(255, 255, 255, 0.18) 50%,
+                rgba(255, 255, 255, 0.02) 80%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-25deg);
+            pointer-events: none;
+            z-index: 3;
+            transition: left 0.75s ease-in-out;
+        }
+
+        .hydrangea-box-wrapper:hover .hydrangea-box::after {
+            left: 150%;
+        }
+
+        @keyframes spin {
+            0% {
+                --glow-angle: 0deg;
+            }
+            100% {
+                --glow-angle: 360deg;
+            }
+        }
+
+        .hydrangea-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sway animation for flowers */
+        @keyframes sway {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(1.5deg);
+            }
+        }
+
+        .flower-cluster {
+            transform-box: fill-box;
+            transform-origin: center bottom;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        /* Offset sway animations */
+        .flower-cluster.blue {
+            animation: sway 6s ease-in-out infinite alternate;
+        }
+        .flower-cluster.pink {
+            animation: sway 5.5s ease-in-out infinite alternate -2s;
+        }
+        .flower-cluster.purple {
+            animation: sway 6.5s ease-in-out infinite alternate -4s;
+        }
+
+        .flower-cluster:hover {
+            transform: scale(1.08) translateY(-6px) rotate(1.5deg);
+        }
+
+        /* Glowing center pistils */
+        .center-pistil {
+            fill: #ffeaa7;
+        }
+
+        /* Animations */
+        @keyframes containerAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 2rem 1.5rem;
+            }
+            .idea-title {
+                font-size: 3.5rem;
+            }
+            .tagline {
+                font-size: 0.8rem;
+                letter-spacing: 0.1em;
+            }
+            .hydrangea-box-wrapper {
+                width: 100%;
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <div class="ambient-glow" id="glow"></div>
+    
+    <div class="container">
+        <h1 class="idea-title" id="ideaText">아이디어 저장소</h1>
+        <div class="tagline">Idea Repository</div>
+        
+        <!-- Hydrangea Box Wrapper with light reflection borders and ambient glow -->
+        <div class="hydrangea-box-wrapper">
+            <div class="hydrangea-box">
+                <svg viewBox="0 0 500 300" class="hydrangea-svg">
+                    <defs>
+                        <!-- Mini flower symbol -->
+                        <g id="mini-flower">
+                            <path class="petal" d="M 0,0 C -2.5,-3 -2.5,-7 0,-10 C 2.5,-7 2.5,-3 0,0" />
+                            <path class="petal" d="M 0,0 C -2.5,3 -2.5,7 0,10 C 2.5,7 2.5,3 0,0" />
+                            <path class="petal" d="M 0,0 C -3,-2.5 -7,-2.5 -10,0 C -7,2.5 -3,2.5 0,0" />
+                            <path class="petal" d="M 0,0 C 3,-2.5 7,-2.5 10,0 C 7,2.5 3,2.5 0,0" />
+                            <circle cx="0" cy="0" r="1.2" class="center-pistil" />
+                        </g>
+                        <!-- Leaf symbol -->
+                        <g id="hydrangea-leaf">
+                            <path d="M 0,0 C -12,-16 -28,-16 -40,0 C -28,16 -12,16 0,0 Z" fill="#0d4030" stroke="#00b894" stroke-width="1.2" />
+                            <path d="M -40,0 Q -20,-2 0,0 M -32,0 Q -24,-6 -20,-3 M -24,0 Q -16,-6 -12,-2 M -16,0 Q -8,-4 -5,-1 M -32,0 Q -24,6 -20,3 M -24,0 Q -16,6 -12,2 M -16,0 Q -8,4 -5,1" stroke="rgba(0,184,148,0.4)" stroke-width="0.8" fill="none" />
+                        </g>
+                        <!-- Shadow filter for flowers -->
+                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="1" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
+                        </filter>
+                    </defs>
+
+                    <!-- Stems -->
+                    <path d="M 160,280 Q 155,230 165,170" stroke="#0b3024" stroke-width="3.5" fill="none" stroke-linecap="round" />
+                    <path d="M 250,280 Q 250,230 250,150" stroke="#0b3024" stroke-width="3.5" fill="none" stroke-linecap="round" />
+                    <path d="M 340,280 Q 345,230 335,170" stroke="#0b3024" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+                    <!-- Leaves (Left) -->
+                    <use href="#hydrangea-leaf" transform="translate(145, 210) rotate(-25) scale(0.7)" />
+                    <use href="#hydrangea-leaf" transform="translate(175, 195) rotate(155) scale(0.7)" />
+
+                    <!-- Leaves (Center) -->
+                    <use href="#hydrangea-leaf" transform="translate(230, 200) rotate(-40) scale(0.85)" />
+                    <use href="#hydrangea-leaf" transform="translate(270, 185) rotate(140) scale(0.85)" />
+
+                    <!-- Leaves (Right) -->
+                    <use href="#hydrangea-leaf" transform="translate(325, 200) rotate(-15) scale(0.7)" />
+                    <use href="#hydrangea-leaf" transform="translate(355, 215) rotate(165) scale(0.7)" />
+
+                    <!-- Flower Clusters (Inner translation container controls sway, id controls JS binding) -->
+                    <g transform="translate(165, 140)">
+                        <g id="flower-cluster-1" class="flower-cluster blue" filter="url(#shadow)"></g>
+                    </g>
+                    <g transform="translate(250, 120)">
+                        <g id="flower-cluster-2" class="flower-cluster pink" filter="url(#shadow)"></g>
+                    </g>
+                    <g transform="translate(335, 140)">
+                        <g id="flower-cluster-3" class="flower-cluster purple" filter="url(#shadow)"></g>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Smooth mouse tracking glow effect
+        const glow = document.getElementById('glow');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let currentX = mouseX;
+        let currentY = mouseY;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Ease movement for a smoother lag/spring effect
+        function animateGlow() {
+            const ease = 0.08;
+            currentX += (mouseX - currentX) * ease;
+            currentY += (mouseY - currentY) * ease;
+            
+            glow.style.left = `${currentX}px`;
+            glow.style.top = `${currentY}px`;
+            
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+
+        // Bounce effect on text click
+        const text = document.getElementById('ideaText');
+        text.addEventListener('click', () => {
+            text.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                text.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    text.style.transform = '';
+                }, 150);
+            }, 100);
+        });
+
+        // Generate Hydrangea Clusters Dynamically
+        const clusters = [
+            { id: 'flower-cluster-1', type: 'blue' },
+            { id: 'flower-cluster-2', type: 'pink' },
+            { id: 'flower-cluster-3', type: 'purple' }
+        ];
+
+        clusters.forEach(cluster => {
+            const group = document.getElementById(cluster.id);
+            
+            // Central starting node
+            createMiniFlower(group, 0, 0, 0, cluster.type);
+            
+            // Ring 1 (Inner) - Radius ~15
+            const ring1Count = 6;
+            for(let i=0; i<ring1Count; i++) {
+                const angle = (i / ring1Count) * Math.PI * 2 + Math.random() * 0.4;
+                const radius = 12 + Math.random() * 4;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                createMiniFlower(group, x, y, Math.random() * 360, cluster.type);
+            }
+            
+            // Ring 2 (Middle) - Radius ~30
+            const ring2Count = 12;
+            for(let i=0; i<ring2Count; i++) {
+                const angle = (i / ring2Count) * Math.PI * 2 + Math.random() * 0.3;
+                const radius = 28 + Math.random() * 6;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                createMiniFlower(group, x, y, Math.random() * 360, cluster.type);
+            }
+            
+            // Ring 3 (Outer) - Radius ~45
+            const ring3Count = 18;
+            for(let i=0; i<ring3Count; i++) {
+                const angle = (i / ring3Count) * Math.PI * 2 + Math.random() * 0.2;
+                const radius = 42 + Math.random() * 6;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                createMiniFlower(group, x, y, Math.random() * 360, cluster.type);
+            }
+
+            // Ring 4 (Edge soft fill) - Radius ~55
+            const ring4Count = 12;
+            for(let i=0; i<ring4Count; i++) {
+                const angle = (i / ring4Count) * Math.PI * 2 + Math.random() * 0.2;
+                const radius = 54 + Math.random() * 4;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                createMiniFlower(group, x, y, Math.random() * 360, cluster.type);
+            }
+        });
+
+        function createMiniFlower(parent, x, y, rotation, type) {
+            const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+            use.setAttribute("href", "#mini-flower");
+            
+            // Position using translate instead of direct x/y to ensure scaling/rotation center works correctly
+            const scale = 0.8 + Math.random() * 0.3;
+            use.setAttribute("transform", `translate(${x}, ${y}) rotate(${rotation}) scale(${scale})`);
+            
+            // Select a beautiful shade based on flower type
+            use.style.fill = getRandomColorShade(type);
+            
+            parent.appendChild(use);
+        }
+
+        function getRandomColorShade(type) {
+            let colors = [];
+            if(type === 'blue') {
+                // Vibrant hydrangeas hues (blue, aqua, deep sky blue, lavender blue)
+                colors = ['#54a0ff', '#70a1ff', '#81ecec', '#a29bfe', '#48dbfb', '#5758bb'];
+            } else if(type === 'pink') {
+                // Vibrant pink hydrangeas hues (rose, pink, pale orange, deep pink)
+                colors = ['#ff7675', '#fd79a8', '#ff9ff3', '#f368e0', '#ff6b6b', '#f8a5c2'];
+            } else if(type === 'purple') {
+                // Purple/violet hues
+                colors = ['#a29bfe', '#6c5ce7', '#9b59b6', '#e056fd', '#be2edd', '#dff9fb'];
+            }
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+    </script>
+</body>
+</html>
