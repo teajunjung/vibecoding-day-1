@@ -99,6 +99,8 @@
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             user-select: none;
+            word-break: keep-all;
+            max-width: 100%;
         }
 
         .idea-title:hover {
@@ -318,15 +320,84 @@
                 height: 240px;
             }
         }
+
+        /* Premium button styles */
+        .premium-button {
+            margin-top: 1.8rem;
+            margin-bottom: 0.5rem;
+            padding: 0.8rem 2.2rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            background-color: var(--btn-bg, #00b894);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--btn-glow, rgba(0, 184, 148, 0.3));
+            transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease, border-color 0.4s ease;
+            font-family: 'Noto Sans KR', sans-serif;
+            letter-spacing: 0.05em;
+            z-index: 10;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-button:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 25px var(--btn-glow-hover, rgba(0, 184, 148, 0.5));
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .premium-button:active {
+            transform: translateY(-1px) scale(0.97);
+            box-shadow: 0 4px 12px var(--btn-glow, rgba(0, 184, 148, 0.3));
+        }
+
+        /* Light sweep reflection effect */
+        .premium-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-25deg);
+            transition: left 0.6s ease-in-out;
+        }
+
+        .premium-button:hover::after {
+            left: 150%;
+        }
+
+        /* Fireworks Canvas */
+        #fireworksCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
     <div class="grid-overlay"></div>
     <div class="ambient-glow" id="glow"></div>
+    <canvas id="fireworksCanvas"></canvas>
     
     <div class="container">
         <h1 class="idea-title" id="ideaText">오늘도 힘내세요</h1>
         <div class="tagline">Idea Repository</div>
+        
+        <!-- Button to toggle sentences -->
+        <button id="nextBtn" class="premium-button">다음 문장 보기</button>
         
         <!-- Hydrangea Box Wrapper with light reflection borders and ambient glow -->
         <div class="hydrangea-box-wrapper">
@@ -422,6 +493,46 @@
             }, 100);
         });
 
+        // Sentence and button color toggle logic
+        const nextBtn = document.getElementById('nextBtn');
+        const sentences = ["오늘도 힘내세요", "오늘도 좋은 일이 생길거야"];
+        const buttonColors = [
+            { bg: '#00b894', glow: 'rgba(0, 184, 148, 0.3)', hover: 'rgba(0, 184, 148, 0.5)' }, // Mint Green
+            { bg: '#6c5ce7', glow: 'rgba(108, 92, 231, 0.3)', hover: 'rgba(108, 92, 231, 0.5)' }, // Purple
+            { bg: '#fd79a8', glow: 'rgba(253, 121, 168, 0.3)', hover: 'rgba(253, 121, 168, 0.5)' }, // Pink
+            { bg: '#0984e3', glow: 'rgba(9, 132, 227, 0.3)', hover: 'rgba(9, 132, 227, 0.5)' }   // Blue
+        ];
+        
+        let sentenceIndex = 0;
+        let colorIndex = 0;
+        
+        nextBtn.addEventListener('click', () => {
+            // Toggle sentence text
+            sentenceIndex = (sentenceIndex + 1) % sentences.length;
+            text.textContent = sentences[sentenceIndex];
+            
+            // Increment color index to cycle button colors
+            colorIndex = (colorIndex + 1) % buttonColors.length;
+            const nextColor = buttonColors[colorIndex];
+            
+            // Apply CSS variables to update the button color
+            nextBtn.style.setProperty('--btn-bg', nextColor.bg);
+            nextBtn.style.setProperty('--btn-glow', nextColor.glow);
+            nextBtn.style.setProperty('--btn-glow-hover', nextColor.hover);
+            
+            // Apply simple bounce effect on text shift
+            text.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                text.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    text.style.transform = '';
+                }, 150);
+            }, 100);
+            
+            // Trigger fireworks in the upper-right corner
+            launchFireworks();
+        });
+
         // Generate Hydrangea Clusters Dynamically
         const clusters = [
             { id: 'flower-cluster-1', type: 'blue' },
@@ -503,6 +614,137 @@
                 colors = ['#a29bfe', '#6c5ce7', '#9b59b6', '#e056fd', '#be2edd', '#dff9fb'];
             }
             return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Fireworks canvas setup and animation logic
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class FireworksParticle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 3; // Initial velocity
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.gravity = 0.12;
+                this.drag = 0.95;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.01;
+                this.size = Math.random() * 2.5 + 1.5;
+                this.history = [];
+                this.maxHistory = 4;
+            }
+
+            update() {
+                this.history.push({ x: this.x, y: this.y });
+                if (this.history.length > this.maxHistory) {
+                    this.history.shift();
+                }
+                this.vx *= this.drag;
+                this.vy *= this.drag;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+
+            draw(context) {
+                context.save();
+                context.globalCompositeOperation = 'screen';
+                
+                // Draw path history (trail)
+                if (this.history.length > 0) {
+                    context.beginPath();
+                    context.moveTo(this.history[0].x, this.history[0].y);
+                    for (let i = 1; i < this.history.length; i++) {
+                        context.lineTo(this.history[i].x, this.history[i].y);
+                    }
+                    context.strokeStyle = this.color;
+                    context.lineWidth = this.size * 0.6;
+                    context.globalAlpha = this.alpha * 0.35;
+                    context.stroke();
+                }
+
+                // Draw main particle
+                context.beginPath();
+                context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                context.fillStyle = this.color;
+                context.globalAlpha = this.alpha;
+                
+                // Neon glow
+                context.shadowBlur = 10;
+                context.shadowColor = this.color;
+                
+                context.fill();
+                context.restore();
+            }
+        }
+
+        let fParticles = [];
+        let fAnimationId = null;
+
+        function launchFireworks() {
+            // Burst in top-right area (x: 75%~85% of screen width, y: 15%~25% of screen height)
+            const fireworkColors = ['#55efc4', '#81ecec', '#a29bfe', '#fd79a8', '#ff7675', '#ffeaa7', '#74b9ff'];
+            const bursts = [
+                { delay: 0, xOffset: 0.8, yOffset: 0.2 },
+                { delay: 150, xOffset: 0.85, yOffset: 0.15 },
+                { delay: 300, xOffset: 0.75, yOffset: 0.25 }
+            ];
+
+            bursts.forEach(burst => {
+                setTimeout(() => {
+                    const x = canvas.width * burst.xOffset + (Math.random() * 60 - 30);
+                    const y = canvas.height * burst.yOffset + (Math.random() * 60 - 30);
+                    createBurst(x, y, fireworkColors);
+                }, burst.delay);
+            });
+        }
+
+        function createBurst(x, y, colors) {
+            const particleCount = 40;
+            const themeColor1 = colors[Math.floor(Math.random() * colors.length)];
+            const themeColor2 = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let i = 0; i < particleCount; i++) {
+                const color = Math.random() > 0.5 ? themeColor1 : themeColor2;
+                fParticles.push(new FireworksParticle(x, y, color));
+            }
+
+            if (!fAnimationId) {
+                tickFireworks();
+            }
+        }
+
+        function tickFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = fParticles.length - 1; i >= 0; i--) {
+                const p = fParticles[i];
+                p.update();
+                if (p.alpha <= 0) {
+                    fParticles.splice(i, 1);
+                } else {
+                    p.draw(ctx);
+                }
+            }
+
+            if (fParticles.length > 0) {
+                fAnimationId = requestAnimationFrame(tickFireworks);
+            } else {
+                fAnimationId = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
         }
     </script>
 </body>
